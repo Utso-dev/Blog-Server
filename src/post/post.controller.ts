@@ -2,8 +2,13 @@ import type { Request, Response } from "express";
 import { postService } from "./post.service";
 
 const createPost = async (req: Request, res: Response) => {
+
   try {
-    const result = await postService.postCreateDB(req.body);
+    const postData = {
+      ...req.body,
+      authorId: req.user?.id,
+    };
+    const result = await postService.postCreateDB(postData);
     res.status(201).json({
       success: true,
       message: "Post created successfully",
@@ -18,7 +23,6 @@ const createPost = async (req: Request, res: Response) => {
   }
 };
 
-
 const getAllPosts = async (req: Request, res: Response) => {
   try {
     const result = await postService.getAllPostsDB();
@@ -29,16 +33,14 @@ const getAllPosts = async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     res.status(500).json({
-      success: false,   
-        message: "Internal server error",
-        error: (error as Error).message,
+      success: false,
+      message: "Internal server error",
+      error: (error as Error).message,
     });
   }
-
 };
 
 export const postController = {
   createPost,
   getAllPosts,
 };
-

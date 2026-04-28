@@ -47,13 +47,15 @@ const authMiddleware = (...roles: UserRole[]) => {
           error: "You do not have permission to access this resource",
         });
       }
-        req.user = {
-            id: session.user.id,
-            email: session.user.email,
-            name: session.user.name,
-            role: session.user.role as string,
-            emailVerified: session.user.emailVerified,
-        };
+      req.user = {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+        role: session.user.role as string,
+        emailVerified: session.user.emailVerified,
+      };
+
+      
 
       next();
     } catch (error) {
