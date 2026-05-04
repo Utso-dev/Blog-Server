@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 
-import { postService } from "./post.service";
 import type { PostStatus } from "../../generated/prisma/enums";
-
+import { customPagination } from "../helper/helper.pagination";
+import { postService } from "./post.service";
 
 const createPost = async (req: Request, res: Response) => {
   try {
@@ -30,8 +30,21 @@ const getAllPosts = async (req: Request, res: Response) => {
   try {
     const search = req.query?.search as string | undefined;
     const tags = req.query?.tags ? (req.query.tags as string).split(",") : [];
-    const status = req.query?.status as  PostStatus| undefined;
-    const result = await postService.getAllPostsDB({ search, tags, status });
+    const status = req.query?.status as PostStatus | undefined;
+    const { page, skip, limit, orderByField, orderDirectionValue } =
+      customPagination(req.query);
+
+    const result = await postService.getAllPostsDB({
+      search,
+      tags,
+      status,
+      page,
+      skip,
+      limit,
+      orderByField,
+      orderDirectionValue,
+    });
+
     res.status(200).json({
       success: true,
       message: "Posts retrieved successfully",
@@ -48,32 +61,30 @@ const getAllPosts = async (req: Request, res: Response) => {
 
 const getPostById = async (req: Request, res: Response) => {
   try {
-    const id = req.params.id as string; 
+    const id = req.params.id as string;
     const result = await postService.getPostByIdDB(id);
     if (!result) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
         message: "Post not found",
       });
-    } 
-    res.status(200).json({  
+    }
+    res.status(200).json({
       success: true,
       message: "Post retrieved successfully",
       data: result,
     });
   } catch (error: unknown) {
     res.status(500).json({
-      success: false, 
+      success: false,
       message: "Internal server error",
       error: (error as Error).message,
     });
   }
 };
 
-
 export const postController = {
   createPost,
   getAllPosts,
   getPostById,
-
 };

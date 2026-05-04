@@ -19,6 +19,11 @@ const getAllPostsDB = async (options: {
   search?: string | undefined;
   tags?: string[] | undefined;
   status?: PostStatus | undefined;
+  page: number;
+  skip: number;
+  limit: number;
+  orderByField: string;
+  orderDirectionValue: string;
 }) => {
   try {
     const searchApply: PostWhereInput[] = [];
@@ -49,17 +54,38 @@ const getAllPostsDB = async (options: {
       });
     }
     if (options.status) {
-        searchApply.push({
-          status: options.status,
-        });
-      }
+      searchApply.push({
+        status: options.status,
+      });
+    }
 
     const result = await prisma.post.findMany({
       where: {
         AND: searchApply,
       },
+      skip: options.skip,
+      take: options.limit,
+      orderBy: {
+        [options.orderByField]: options.orderDirectionValue,
+      },
     });
-    return result;
+    const totalCount = await prisma.post.count({
+      where: {
+        AND: searchApply,
+      },
+    });
+
+    const finalResult = {
+      data: result,
+      pagination: {
+        total_item: totalCount,
+        total_pages: Math.ceil(totalCount / options.limit),
+        current_page: options.page,
+        limit: options.limit,
+      },
+    };
+
+    return finalResult;
   } catch (error: unknown) {
     console.log(error);
     throw error;
@@ -67,17 +93,23 @@ const getAllPostsDB = async (options: {
 };
 
 const getPostByIdDB = async (id: string) => {
-  try {
-    const result = await prisma.post.findUnique({
-      where: {
-        id,
-      },
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.post.update({
+      where: { id },
+      data:{
+        views: {
+          increment: 1,
+        },
+      }
+    })
+    
+    const post = await tx.post.findUnique({
+      where: { id },
     });
-    return result;
-  } catch (error: unknown) {
-    console.log(error);
-    throw error;
-  }
+    return post;
+  });
+
+  return result;
 };
 
 export const postService = {
