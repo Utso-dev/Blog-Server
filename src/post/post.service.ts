@@ -66,7 +66,22 @@ const getAllPostsDB = async (options: {
   }
 };
 
+const getPostByIdDB = async (id: string) => {
+  try {
+    const result = await prisma.post.findUnique({
+      where: {
+        id,
+      },
+    });
+    return result;
+  } catch (error: unknown) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const postService = {
   postCreateDB,
   getAllPostsDB,
+  getPostByIdDB,
 };
