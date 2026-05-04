@@ -112,8 +112,36 @@ const getPostByIdDB = async (id: string) => {
   return result;
 };
 
+const postUpdateDB = async (id: string, data: Partial<PostUncheckedCreateInput>) => {
+  try {
+    const result = await prisma.post.update({   
+      where: { id },
+      data,
+    });
+    return result;
+  } catch (error: unknown) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const postDeleteDB = async (id: string) => {
+  try {
+    const result = await prisma.post.delete({ 
+      where: { id },
+    });
+    return result;
+  } catch (error: unknown) {
+    console.log(error);
+    throw error;
+  };
+}
+
+
 export const postService = {
   postCreateDB,
   getAllPostsDB,
   getPostByIdDB,
+  postUpdateDB,
+  postDeleteDB,
 };

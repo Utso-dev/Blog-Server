@@ -83,8 +83,60 @@ const getPostById = async (req: Request, res: Response) => {
   }
 };
 
+const updatePost = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const postData = req.body;
+    const result = await postService.postUpdateDB(id, postData);
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Post updated successfully",
+      data: result,
+    });
+  } catch (error: unknown) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: (error as Error).message,
+    });
+  }
+};
+
+const deletePost = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const result = await postService.postDeleteDB(id);
+    
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Post deleted successfully",
+    });
+    
+  } catch (error: unknown) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: (error as Error).message,
+    });
+  }
+}
+
 export const postController = {
   createPost,
   getAllPosts,
   getPostById,
+  updatePost,
+  deletePost,
 };
