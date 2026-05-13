@@ -3,6 +3,7 @@ import cros from "cors";
 import express from "express";
 import { auth } from "./lib/auth";
 import postRouter from "./post/post.route";
+import commentRouter from "./comment/comment.route";
 const app = express();
 app.use(
   cros({
@@ -14,8 +15,9 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express.json());
 
 // post routes
-app.use("/api/post", postRouter)
-
+app.use("/api/post", postRouter);
+// comment routes
+app.use("/api/comment", commentRouter);
 
 // inital root route
 app.use("/", (req, res) => {

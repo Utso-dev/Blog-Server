@@ -68,6 +68,31 @@ const getAllPostsDB = async (options: {
       orderBy: {
         [options.orderByField]: options.orderDirectionValue,
       },
+      include: {
+        comments: {
+          where: {
+            parentId: null,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            replies: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              include: {
+                replies: {
+                  orderBy: {
+                    createdAt: "desc",
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: { select: { comments: true } },
+      },
     });
     const totalCount = await prisma.post.count({
       where: {
@@ -96,13 +121,13 @@ const getPostByIdDB = async (id: string) => {
   const result = await prisma.$transaction(async (tx) => {
     await tx.post.update({
       where: { id },
-      data:{
+      data: {
         views: {
           increment: 1,
         },
-      }
-    })
-    
+      },
+    });
+
     const post = await tx.post.findUnique({
       where: { id },
     });
@@ -112,9 +137,12 @@ const getPostByIdDB = async (id: string) => {
   return result;
 };
 
-const postUpdateDB = async (id: string, data: Partial<PostUncheckedCreateInput>) => {
+const postUpdateDB = async (
+  id: string,
+  data: Partial<PostUncheckedCreateInput>,
+) => {
   try {
-    const result = await prisma.post.update({   
+    const result = await prisma.post.update({
       where: { id },
       data,
     });
@@ -127,16 +155,15 @@ const postUpdateDB = async (id: string, data: Partial<PostUncheckedCreateInput>)
 
 const postDeleteDB = async (id: string) => {
   try {
-    const result = await prisma.post.delete({ 
+    const result = await prisma.post.delete({
       where: { id },
     });
     return result;
   } catch (error: unknown) {
     console.log(error);
     throw error;
-  };
-}
-
+  }
+};
 
 export const postService = {
   postCreateDB,

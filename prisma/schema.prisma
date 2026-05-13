@@ -35,6 +35,8 @@ model comment {
   postId    String
   post      Post          @relation(fields: [postId], references: [id])
   parentId  String?
+  parent    comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   comment[]     @relation("CommentReplies")
   status    commentStatus @default(PENDING)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
