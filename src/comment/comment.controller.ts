@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { commentService } from "./comment.service";
 import { customPagination } from "../helper/helper.pagination";
+import { commentService } from "./comment.service";
 
 const createComment = async (req: Request, res: Response) => {
   try {
@@ -63,8 +63,17 @@ const getAuthorComments = async (req: Request, res: Response) => {
       });
     }
     const search = req.query.search as string | undefined;
-    const {page,limit,orderByField, orderDirectionValue,skip}= customPagination(req.query)
-    const result = await commentService.getAuthorCommentsDB({ authorId: userId, search, page, limit, orderByField, orderDirectionValue, skip  });
+    const { page, limit, orderByField, orderDirectionValue, skip } =
+      customPagination(req.query);
+    const result = await commentService.getAuthorCommentsDB({
+      authorId: userId,
+      search,
+      page,
+      limit,
+      orderByField,
+      orderDirectionValue,
+      skip,
+    });
     res.status(200).json({
       success: true,
       message: "Author comments retrieved successfully",
@@ -79,8 +88,53 @@ const getAuthorComments = async (req: Request, res: Response) => {
   }
 };
 
+const getCommentById = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.commentId as string;
+    const result = await commentService.getCommentByIdDB(id);
+    res.status(200).json({
+      success: true,
+      message: "Comment retrieved successfully",
+      data: result,
+    });
+  } catch (error: unknown) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: (error as Error).message,
+    });
+  }
+};
+const updateComment = async (req: Request, res: Response) => {
+ try {
+  const commentId = req.params.commentId as string;
+  const updateData = req.body;
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+  const result = await commentService.updateCommentDB(commentId, updateData, userId);
+  res.status(200).json({
+    success: true,
+    message: "Comment updated successfully",
+    data: result,
+  });
+ } catch (error: unknown) {
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+    error: (error as Error).message,
+  });
+ }
+}
+
 export const commentController = {
   createComment,
   commentGetByPostIdDB,
   getAuthorComments,
+  getCommentById,
+  updateComment,
 };

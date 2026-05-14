@@ -10,7 +10,18 @@ router.get(
   commentController.getAuthorComments,
 );
 router.get(
-  "/:postId",
+  "/:commentId",
+  authMiddleware(UserRole.ADMIN, UserRole.USER),
+  commentController.getCommentById,
+);
+router.patch(
+  "/:commentId",
+  authMiddleware(UserRole.ADMIN, UserRole.USER),
+  commentController.updateComment,
+);
+
+router.get(
+  "/all/:postId",
   authMiddleware(UserRole.ADMIN, UserRole.USER),
   commentController.commentGetByPostIdDB,
 );

@@ -65,7 +65,7 @@ const getAuthorCommentsDB = async ({
   skip,
   search,
 }: GetAuthorCommentsDBParams) => {
-const whereCondition: Prisma.commentWhereInput = {
+  const whereCondition: Prisma.commentWhereInput = {
     authorId,
     ...(search && {
       content: {
@@ -106,9 +106,49 @@ const whereCondition: Prisma.commentWhereInput = {
   };
   return finalResult;
 };
+const getCommentByIdDB = async (id: string) => {
+  const result = await prisma.comment.findUnique({
+    where: { id },
+    include: {
+      post: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+    },
+  });
+  if (!result) {
+    throw new Error("Comment not found. please check the comment ID.");
+  }
+  return result;
+};
+
+const updateCommentDB = async (commentId: string, updateData: Partial<commentUncheckedCreateInput>, userId: string) => {
+  const existingComment = await prisma.comment.findUnique({
+    where: { id: commentId },
+  });
+
+  if (!existingComment) {
+    throw new Error("Comment not found. please check the comment ID.");
+  }
+
+  if (existingComment.authorId !== userId) {
+    throw new Error("Unauthorized to update this comment");
+  }
+
+  const result = await prisma.comment.update({
+    where: { id: commentId },
+    data: updateData,
+  });
+
+  return result;
+};
 
 export const commentService = {
   createCommentDB,
   commentGetByPostIdDB,
   getAuthorCommentsDB,
+  getCommentByIdDB,
+  updateCommentDB,
 };
