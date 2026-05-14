@@ -130,6 +130,31 @@ const getPostByIdDB = async (id: string) => {
 
     const post = await tx.post.findUnique({
       where: { id },
+      include: {
+        comments: {
+          where: {
+            parentId: null,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            replies: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              include: {
+                replies: {
+                  orderBy: {
+                    createdAt: "desc",
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: { select: { comments: true } },
+      },
     });
     return post;
   });
@@ -164,6 +189,8 @@ const postDeleteDB = async (id: string) => {
     throw error;
   }
 };
+
+
 
 export const postService = {
   postCreateDB,

@@ -1,10 +1,24 @@
 import { Router } from "express";
-import { commentController } from "./comment.controller";
 import authMiddleware, { UserRole } from "../middleware/authMiddleware";
+import { commentController } from "./comment.controller";
 
 const router = Router();
 
-router.post("/", authMiddleware(UserRole.ADMIN, UserRole.USER), commentController.createComment);
+router.get(
+  "/author/",
+  authMiddleware(UserRole.ADMIN, UserRole.USER),
+  commentController.getAuthorComments,
+);
+router.get(
+  "/:postId",
+  authMiddleware(UserRole.ADMIN, UserRole.USER),
+  commentController.commentGetByPostIdDB,
+);
+router.post(
+  "/",
+  authMiddleware(UserRole.ADMIN, UserRole.USER),
+  commentController.createComment,
+);
 // router.get("/", commentController.getAllComments);
 // router.get("/:id", commentController.getCommentById);
 // router.patch("/:id", commentController.updateComment);
