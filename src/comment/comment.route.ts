@@ -19,6 +19,11 @@ router.patch(
   authMiddleware(UserRole.ADMIN, UserRole.USER),
   commentController.updateComment,
 );
+router.delete(
+  "/:commentId",
+  authMiddleware(UserRole.ADMIN, UserRole.USER),
+  commentController.deleteComment,
+);
 
 router.get(
   "/all/:postId",

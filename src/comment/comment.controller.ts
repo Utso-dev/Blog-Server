@@ -131,10 +131,36 @@ const updateComment = async (req: Request, res: Response) => {
  }
 }
 
+const deleteComment = async (req: Request, res: Response) => {
+  try {
+    const commentId = req.params.commentId as string;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }   
+    const result = await commentService.deleteCommentDB(commentId, userId);
+    res.status(200).json({
+      success: true,  
+      message: "Comment deleted successfully",
+      data: result,
+    });
+  } catch (error: unknown) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: (error as Error).message,
+    });
+  }
+};
+
 export const commentController = {
   createComment,
   commentGetByPostIdDB,
   getAuthorComments,
   getCommentById,
   updateComment,
+  deleteComment,
 };

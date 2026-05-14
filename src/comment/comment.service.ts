@@ -145,10 +145,31 @@ const updateCommentDB = async (commentId: string, updateData: Partial<commentUnc
   return result;
 };
 
+const deleteCommentDB = async (commentId: string, userId: string) => {
+  const existingComment = await prisma.comment.findUnique({
+    where: { id: commentId },
+  });
+
+  if (!existingComment) {
+    throw new Error("Comment not found. please check the comment ID.");
+  }
+
+  if (existingComment.authorId !== userId) {
+    throw new Error("Unauthorized to delete this comment");
+  }
+
+  const result = await prisma.comment.delete({
+    where: { id: commentId },
+  });
+
+  return result;
+};
+
 export const commentService = {
   createCommentDB,
   commentGetByPostIdDB,
   getAuthorCommentsDB,
   getCommentByIdDB,
   updateCommentDB,
+  deleteCommentDB,
 };
